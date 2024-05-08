@@ -1,34 +1,36 @@
 #!/usr/bin/env bash
-# Bash script that configures an Nginx server so that
-# /redirect_me is redirecting to another page.
+# Configures a new ubuntu machine by installing
+# Nginx where it should be listening on port 80
+# Serve a page that would return a Hello World string
+#
 
-sudo apt-get -y update
-sudo apt-get -y install nginx
 
-# Create a index file
-echo "Hello World!" > /var/www/html/index.nginx-debian.html
+echo -e "Updating and installing Nginx.\n"
+sudo apt-get update -y -qq && \
+         sudo apt-get install nginx -y
 
-# Check if the backup file exists for the original `default` file.
-# This is meant to back up the file once the first time, after installing nginx.
-# if [ ! -f /etc/nginx/sites-available/default.bak ]; then
-#     sudo cp /etc/nginx/sites-available/default /etc/nginx/sites-available/default.bak
-# fi
-# 
-# if [ ! -f /etc/nginx/sites-enabled/default.bak ]; then
-#     sudo cp /etc/nginx/sites-enabled/default /etc/nginx/sites-enabled/default.bak
-# fi
+echo -e "\nSetting up some minor stuff.\n"
 
-# This modifies the `default` file, that is why I backed it up first
-printf %s "server {
-    listen 80;
-    listen [::]:80 default_server;
+# starting nginx service
+sudo service nginx start
 
-    root /var/www/html;
-    index uche.html index.html index.htm index.nginx-debian.html;
+# allowing nginx on firewall
+sudo ufw allow 'Nginx HTTP'
 
-    location /redirect_me {
-        return 301 https://www.github.com/nomorezhanje23;
-    }
-}" > /etc/nginx/sites-enabled/default
+# Give the user ownership to website files for easy editing
+sudo chown -R "$USER":"$USER" /var/www/html
+sudo chmod -R 755 /var/www
 
+# Backup default index
+cp /var/www/html/index.nginx-debian.html /var/www/html/index.nginx-debian.html.bckp
+
+# Creating new index
+echo -e "Hello World!" > /var/www/html/index.nginx-debian.html
+
+# Setting up /redirect_me to a youtube video
+sudo sed -i '24i\       rewrite ^/redirect_me https://www.youtube.com/watch?v=QH2-TGUlwu4 permanent;' /etc/nginx/sites-available/default
+
+# Restarting nginx
 sudo service nginx restart
+
+echo -e "\nCompleted.\n"
