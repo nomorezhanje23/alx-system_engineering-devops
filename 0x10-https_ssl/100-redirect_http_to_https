@@ -41,7 +41,7 @@ frontend zhanje-frontend
         default_backend zhanje-backend
 
 frontend zhanje-frontend-https
-        bind *:443 ssl crt /etc/haproxy/certs/zhanje.tech.pem
+        bind *:443 ssl crt /etc/haproxy/certs/www.zhanje.tech.pem
         http-request set-header X-Forwarded-Proto https
         default_backend zhanje-backend
 
